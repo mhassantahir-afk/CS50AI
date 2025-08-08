@@ -59,7 +59,76 @@ def load_data(filename):
     labels should be the corresponding list of labels, where each label
     is 1 if Revenue is true, and 0 otherwise.
     """
-    raise NotImplementedError
+    # this is the list of all of the keys that are to be turned into an integer
+    integer_list = ["Administrative", "Informational", "ProductRelated",
+                    "OperatingSystems", "Browser", "Region", "TrafficType"]
+    # this is the list of all of the keys that are to be turned into a float
+    floating_list = ["Administrative_Duration", "Informational_Duration",
+                     "ProductRelated_Duration", "BounceRates", "ExitRates", "PageValues", "SpecialDay"]
+    # dictionary that stores the values of months as keys against the numbers required
+    months = {
+        "Jan": 0,
+        "Feb": 1,
+        "Mar": 2,
+        "Apr": 3,
+        "May": 4,
+        "Jun": 5,
+        "Jul": 6,
+        "Aug": 7,
+        "Sep": 8,
+        "Oct": 9,
+        "Nov": 10,
+        "Dec": 11
+    }
+
+    # list for headers in order
+    column_order = [
+        "Administrative", "Administrative_Duration", "Informational", "Informational_Duration",
+        "ProductRelated", "ProductRelated_Duration", "BounceRates", "ExitRates",
+        "PageValues", "SpecialDay", "Month", "OperatingSystems", "Browser",
+        "Region", "TrafficType", "VisitorType", "Weekend"
+    ]
+
+    evidence = []  # this will be the list that will store the evidence
+    labels = []  # list that will store the labels
+
+    with open(filename) as file:
+        reader = csv.DictReader(file)
+        reader_dict = list(reader)  # turning DictReader() into a list()
+
+        for row in reader_dict:  # loop iterates iver the list
+            inner_evidence = []
+            for header in column_order:  # innerloop iterates over column_order
+                data_1 = 0  # this will store the data that is to be appended against each key
+
+                '''
+                    the logic underneath checks what group each key belongs and turns the value from the csv into that type(int(), float(), 0/1)
+                '''
+                if header in integer_list:
+                    data_1 = int(row[header])
+                elif header in floating_list:
+                    data_1 = float(row[header])
+                elif row[header] in months:
+                    data_1 = int(months[row[header]])
+                elif header == "VisitorType":
+                    if row[header] == "Returning_Visitor":
+                        data_1 = 1
+                    else:
+                        data_1 = 0
+                elif header == "Weekend":
+                    if row[header] == "TRUE":
+                        data_1 = 1
+                    else:
+                        data_1 = 0
+
+                inner_evidence.append(data_1)  # this is appended to the inner list
+
+            evidence.append(
+                inner_evidence  # after one complete cycle the inner list is appended into the outer list
+            )
+            labels.append(1 if row["Revenue"] == "TRUE" else 0)
+
+    return (evidence, labels)
 
 
 def train_model(evidence, labels):
@@ -67,7 +136,11 @@ def train_model(evidence, labels):
     Given a list of evidence lists and a list of labels, return a
     fitted k-nearest neighbor model (k=1) trained on the data.
     """
-    raise NotImplementedError
+
+    training_model = KNeighborsClassifier(n_neighbors=1)
+    training_model.fit(evidence, labels)
+
+    return training_model
 
 
 def evaluate(labels, predictions):
@@ -85,7 +158,35 @@ def evaluate(labels, predictions):
     representing the "true negative rate": the proportion of
     actual negative labels that were accurately identified.
     """
-    raise NotImplementedError
+
+    true_positives = 0
+    true_negatives = 0
+    false_positives = 0
+    false_negatives = 0
+
+    for actual, predicted in zip(labels, predictions):
+        if actual == 1 and predicted == 1:
+            true_positives += 1
+        elif actual == 0 and predicted == 0:
+            true_negatives += 1
+        elif actual == 0 and predicted == 1:
+            false_positives += 1
+        elif actual == 1 and predicted == 0:
+            false_negatives += 1
+
+    # Calculate sensitivity (true positive rate)
+    if (true_positives + false_negatives) > 0:
+        sensitivity = true_positives / (true_positives + false_negatives)
+    else:
+        sensitivity = 0
+
+    # Calculate specificity (true negative rate)
+    if (true_negatives + false_positives) > 0:
+        specificity = true_negatives / (true_negatives + false_positives)
+    else:
+        specificity = 0
+
+    return (sensitivity, specificity)
 
 
 if __name__ == "__main__":
