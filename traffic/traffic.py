@@ -3,6 +3,7 @@ import numpy as np
 import os
 import sys
 import tensorflow as tf
+from keras import layers
 
 from sklearn.model_selection import train_test_split
 
@@ -58,7 +59,20 @@ def load_data(data_dir):
     be a list of integer labels, representing the categories for each of the
     corresponding `images`.
     """
-    raise NotImplementedError
+
+    images = []  # list for the loaded photos
+    labels = []  # list for their corresponding labels
+
+    for dir in os.listdir(data_dir):
+
+        for i in os.listdir(os.path.join(data_dir, dir)):
+            # reads image and turns into(x, x, y) format
+            image = cv2.imread(os.path.join(data_dir, dir, i))
+            resized_image = cv2.resize(image, (IMG_WIDTH, IMG_HEIGHT))  # reshaping it into(30, 30, 3)
+            images.append(resized_image)  # appending photo to the list
+            labels.append(int(dir))  # appending label to the list
+
+    return images, labels
 
 
 def get_model():
@@ -67,7 +81,33 @@ def get_model():
     `input_shape` of the first layer is `(IMG_WIDTH, IMG_HEIGHT, 3)`.
     The output layer should have `NUM_CATEGORIES` units, one for each category.
     """
-    raise NotImplementedError
+    image_model = tf.keras.Sequential([
+        # First Convolutional Block
+        layers.Conv2D(filters=32, kernel_size=(7, 7), input_shape=(IMG_HEIGHT, IMG_WIDTH, 3), activation="relu"),
+        layers.BatchNormalization(),
+        layers.Conv2D(32, (3, 3), activation='relu'),
+        layers.MaxPooling2D(2, 2),
+        layers.Dropout(rate=0.5),
+
+        # Second Convolutional Block
+        layers.Conv2D(64, (3, 3), activation='relu'),
+        layers.BatchNormalization(),
+        layers.Conv2D(64, (3, 3), activation='relu'),
+        layers.MaxPooling2D(2, 2),
+        layers.Dropout(rate=0.5),  # Dropout rate
+
+        layers.GlobalAveragePooling2D(),  # Flatten Layer
+
+        layers.Dense(units=NUM_CATEGORIES, activation="softmax")]
+    )
+
+    image_model.compile(
+        optimizer=tf.keras.optimizers.Adam(learning_rate=0.001),
+        loss='categorical_crossentropy',
+        metrics=['accuracy'],
+    )
+
+    return image_model
 
 
 if __name__ == "__main__":
