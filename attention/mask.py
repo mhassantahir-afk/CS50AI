@@ -45,9 +45,17 @@ def get_mask_token_index(mask_token_id, inputs):
     Return the index of the token with the specified `mask_token_id`, or
     `None` if not present in the `inputs`.
     """
-    # TODO: Implement this function
-    raise NotImplementedError
+    inputIds = inputs['input_ids'] # extracting the string of ids
+    token_list = inputIds.numpy().tolist() # taking out form the Tensor to numpy list
+    tokens = token_list[0] 
+    
+    index = int()
 
+    for i in range(len(tokens)): # matches tokens with the mask_token_id
+        if tokens[i] == mask_token_id:
+            index = i
+    
+    return index # returning the index(zero-indexed)
 
 
 def get_color_for_attention_score(attention_score):
