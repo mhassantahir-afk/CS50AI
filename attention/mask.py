@@ -49,7 +49,7 @@ def get_mask_token_index(mask_token_id, inputs):
     token_list = inputIds.numpy().tolist() # taking out form the Tensor to numpy list
     tokens = token_list[0] 
     
-    index = int()
+    index = None
 
     for i in range(len(tokens)): # matches tokens with the mask_token_id
         if tokens[i] == mask_token_id:
@@ -89,7 +89,7 @@ def visualize_attentions(tokens, attentions):
 
             generate_diagram(
                 layer + 1,
-                head_no + 1,
+                head + 1,
                 tokens,
                 attentions[layer][0][head]
             )
