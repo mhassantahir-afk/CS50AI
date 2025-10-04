@@ -7,6 +7,12 @@
 
 ---
 
+## Certificate
+
+<img src="https://certificates.cs50.io/4e430343-fe78-4a98-88f9-7f2ea30491ad.pdf?size=letter">
+
+---
+
 ## 🎥 Lecture Series
 
 1. **Lecture 0 – Search**  
